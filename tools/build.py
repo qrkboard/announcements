@@ -2,14 +2,14 @@
 """Turns announcements/*.md into _site/announcements.json for the boards.
 
 Each file starts with a header between --- lines (title, date, and optional
-min_version, max_version, platforms, expires, draft, title_fr, title_cs).
+min_version, max_version, platforms, expires, draft, welcome, title_fr, title_cs).
 A translation of the body goes beside it as <id>.fr.md or <id>.cs.md.
 The file name (without .md) is the announcement's id: never rename one.
 """
 import json, os, re, shutil, sys
 
 src, out = sys.argv[1], sys.argv[2]
-KEYS = {"title", "date", "min_version", "max_version", "platforms", "expires", "draft"}
+KEYS = {"title", "date", "min_version", "max_version", "platforms", "expires", "draft", "welcome"}
 LANGS = {"fr", "cs"}
 errors, items = [], []
 
@@ -42,8 +42,9 @@ for name in sorted(os.listdir(src)):
             item[k] = head[k]
     if head.get("platforms"):
         item["platforms"] = [p.strip() for p in head["platforms"].split(",") if p.strip()]
-    if head.get("draft", "").lower() == "true":
-        item["draft"] = True
+    for flag in ("draft", "welcome"):
+        if head.get(flag, "").lower() == "true":
+            item[flag] = True
     for lang in LANGS:
         tr = {}
         if head.get("title_" + lang):
